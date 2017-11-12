@@ -19,12 +19,15 @@ public class Berry {
     private Vector3 accel;
     private Vector3 gravity;
 
+    Vector3 size=new Vector3(128,128,0);
+
     private Rectangle bounds;
     private Texture cranTexture;
     private Sprite cranSprite;
     private boolean isTouchingGround;
     private Animation cranAnimation;
-
+    box[] boxes=new box[10];
+    int numOfBoxes=0;
 
     public Berry(int x, int y){
         position = new Vector3(x,y,0);
@@ -38,16 +41,15 @@ public class Berry {
         cranSprite = new Sprite(cranTexture,0,0,32,32);
         bounds = new Rectangle(x,y,128,128);
     }
-    public void update(float dt){
 
+    void giveBoxes(box[] b){
+        numOfBoxes=b.length;
+        System.arraycopy(b,0,boxes,0,b.length);
+    }
+    public void update(float dt){
         handleInput();
         adjustments();
         cranAnimation.update(dt);
-
-        checkEdges();
-        accel = new Vector3(0,0,0);
-
-
     }
 
     public Sprite getCran(){
@@ -61,40 +63,67 @@ public class Berry {
     }
 
     public void handleInput(){
-        if(Gdx.input.isKeyPressed(62)){
-
-            accel.add(0, 2, 0);
+        if(isTouchingGround&&Gdx.input.isKeyPressed(62)){//62=spacebar
             velocity.set(0,10,0);
-            System.out.println(velocity.y);
-            System.out.println(accel.y);
+            isTouchingGround=false;
         }
     }
+
     private void adjustments(){
-        checkGround();
-        accel.add(gravity);
-        velocity.add(accel);
-
-        position.add(velocity);
-
-
-    }
-    public void checkEdges(){
-        if(this.position.y<0){
-            position.y=0;
+        if (velocity.y<0||(!isTouchingGround&&!Gdx.input.isKeyPressed(62))) {
+            velocity.y+=gravity.y/2;
         }
-        if(this.position.y>CranGame.HEIGHT-32){
-            position.y=CranGame.HEIGHT -32;
+        velocity.add(gravity);
+        if (checkX()){
+            velocity.x=1;
+            position.x+=velocity.x;
+        }else{
+            velocity.x=0;
+        }
+        if (checkY()) {
+            position.y+=velocity.y;
+        }else{
+            if (velocity.y<0){
+                isTouchingGround=true;
+            }
             velocity.y=0;
-            System.out.println("celling");
         }
-
     }
+
+    public boolean checkX(){
+        for (int i=0;i<numOfBoxes;i++){
+            if (    position.y+size.y>boxes[i].getYPos()&&
+                    position.y<boxes[i].getYandHeight()&&
+                    velocity.x+position.x+size.x>boxes[i].getXPos()&&
+                    velocity.x+position.x<boxes[i].getXandWidth()
+                    ){
+                position.x=boxes[i].getXPos()-size.x;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkY(){
+        for (int i=0;i<numOfBoxes;i++){
+            if (    position.y+velocity.y+size.y>boxes[i].getYPos()&&
+                    position.y+velocity.y<boxes[i].getYandHeight()&&
+                    position.x+size.x>boxes[i].getXPos()&&
+                    position.x<boxes[i].getXandWidth()){
+                if (velocity.y<0){
+                    position.y=boxes[i].getYandHeight();
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void checkGround(){
         if(this.position.y <=0){
             velocity.y =0;
+            isTouchingGround=true;
         }
-
-
     }
 
 
