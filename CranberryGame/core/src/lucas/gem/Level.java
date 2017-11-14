@@ -1,6 +1,6 @@
 package lucas.gem;
 
-import java.util.Random;
+import javax.swing.Box;
 
 /**
  * Created by chandler on 11/11/2017.
@@ -8,23 +8,23 @@ import java.util.Random;
 
 
 public class Level {
-    box[] boxes;
-    public Level(BoxConfig b){
-        switch(b){
-            case LEVEL1:
-                boxes=new box[] {
-                        new box(0,0,1080,100),
-                        new box(200,100,480,100),
-                        new box (450,200,340,100)
-                };
+    box[][] order;
+    public Level(int i){
+        switch (i){
+            case 1:
+                order = new box[][] {makeBoxes(BoxConfig.CONFIG1),makeBoxes(BoxConfig.CONFIG2), makeBoxes(BoxConfig.CONFIG3),makeBoxes(BoxConfig.CONFIG4),makeBoxes(BoxConfig.CONFIG5)};
+                break;
         }
     }
-    public boolean getBox(int i,float[] cords,float[] color){
-        if (i<boxes.length){
-            System.arraycopy(boxes[i].bounds,0,cords,0,4);
-            System.arraycopy(boxes[i].color,0,color,0,4);
-            return true;
-        }
-        return false;
+    private box[] makeBoxes(BoxConfig boxConfig){
+        box[] boxes=boxConfig.getBoxArray().toArray(box.class);
+        return boxes;
+    }
+    box[] getBoxes(int i){
+        System.out.println(i);
+        return order[i];
+    }
+    int getLength(){
+        return order.length;
     }
 }

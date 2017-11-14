@@ -26,8 +26,10 @@ public class Berry {
     private Sprite cranSprite;
     private boolean isTouchingGround;
     private Animation cranAnimation;
-    box[] boxes=new box[10];
-    int numOfBoxes=0;
+
+    BoxConfig[] boxConfigs;
+    int numOfBoxes;
+    box[][] boxes;
 
     public Berry(int x, int y){
         position = new Vector3(x,y,0);
@@ -40,11 +42,14 @@ public class Berry {
         cranAnimation = new Animation(cranTexture,12,64f);
         cranSprite = new Sprite(cranTexture,0,0,32,32);
         bounds = new Rectangle(x,y,128,128);
+        boxConfigs=new BoxConfig[2];
+        boxes=new box[2][];
+        numOfBoxes= 0;
     }
 
-    void giveBoxes(box[] b){
-        numOfBoxes=b.length;
-        System.arraycopy(b,0,boxes,0,b.length);
+    void giveBoxConfig(box[][] b){
+        System.arraycopy(b,0,boxes,0,2);
+
     }
     public void update(float dt){
         handleInput();
@@ -64,24 +69,30 @@ public class Berry {
 
     public void handleInput(){
         if(isTouchingGround&&Gdx.input.isKeyPressed(62)){//62=spacebar
-            velocity.set(0,10,0);
+            velocity.set(0,13,0);
             isTouchingGround=false;
         }
     }
 
     private void adjustments(){
-        if (velocity.y<0||(!isTouchingGround&&!Gdx.input.isKeyPressed(62))) {
-            velocity.y+=gravity.y/2;
+        if (!Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+            velocity.add(gravity);
+        }else{
+            velocity.y+=gravity.y*.5f;
         }
-        velocity.add(gravity);
-        if (checkX()){
-            velocity.x=1;
-            position.x+=velocity.x;
+        velocity.x+=1;
+        if (velocity.x>5){
+            velocity.x=5;
+        }
+        if (checkX()) {
+            position.x += velocity.x;
         }else{
             velocity.x=0;
         }
+
+
         if (checkY()) {
-            position.y+=velocity.y;
+            position.y += velocity.y;
         }else{
             if (velocity.y<0){
                 isTouchingGround=true;
@@ -91,40 +102,41 @@ public class Berry {
     }
 
     public boolean checkX(){
-        for (int i=0;i<numOfBoxes;i++){
-            if (    position.y+size.y>boxes[i].getYPos()&&
-                    position.y<boxes[i].getYandHeight()&&
-                    velocity.x+position.x+size.x>boxes[i].getXPos()&&
-                    velocity.x+position.x<boxes[i].getXandWidth()
-                    ){
-                position.x=boxes[i].getXPos()-size.x;
-                return false;
+
+        for (int j=0;j<2;j++) {
+            numOfBoxes=boxes[j].length;
+            for (int i = 0; i < numOfBoxes; i++) {
+                if (position.y + size.y > boxes[j][i].getYPos() &&
+                        position.y < boxes[j][i].getYandHeight() &&
+                        velocity.x + position.x + size.x > boxes[j][i].getXPos()+1080*(CranGame.nextBorder-1+j) &&
+                        velocity.x + position.x < boxes[j][i].getXandWidth()+1080*(CranGame.nextBorder-1+j)
+                        ) {
+                    position.x = boxes[j][i].getXPos()+1080*(CranGame.nextBorder-1+j) - size.x;
+                    return false;
+                }
             }
         }
         return true;
     }
 
     public boolean checkY(){
-        for (int i=0;i<numOfBoxes;i++){
-            if (    position.y+velocity.y+size.y>boxes[i].getYPos()&&
-                    position.y+velocity.y<boxes[i].getYandHeight()&&
-                    position.x+size.x>boxes[i].getXPos()&&
-                    position.x<boxes[i].getXandWidth()){
-                if (velocity.y<0){
-                    position.y=boxes[i].getYandHeight();
+        for (int j=0;j<2;j++){
+            numOfBoxes=boxes[j].length;
+            for (int i=0;i<numOfBoxes;i++){
+                if (    position.y+velocity.y+size.y>boxes[j][i].getYPos()&&
+                        position.y+velocity.y<boxes[j][i].getYandHeight()&&
+                        position.x+size.x>boxes[j][i].getXPos()+1080*(CranGame.nextBorder-1+j)&&
+                        position.x<boxes[j][i].getXandWidth()+1080*(CranGame.nextBorder-1+j)){
+                    if (velocity.y<0){
+                        position.y=boxes[j][i].getYandHeight();
+                    }
+                    return false;
                 }
-                return false;
             }
         }
         return true;
     }
 
-    public void checkGround(){
-        if(this.position.y <=0){
-            velocity.y =0;
-            isTouchingGround=true;
-        }
-    }
 
 
 }
