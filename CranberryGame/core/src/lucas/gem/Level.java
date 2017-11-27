@@ -1,5 +1,9 @@
 package lucas.gem;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import java.util.Stack;
+
 import javax.swing.Box;
 
 /**
@@ -8,23 +12,26 @@ import javax.swing.Box;
 
 
 public class Level {
-    box[][] order;
-    public Level(int i){
-        switch (i){
-            case 1:
-                order = new box[][] {makeBoxes(BoxConfig.CONFIG1),makeBoxes(BoxConfig.CONFIG2), makeBoxes(BoxConfig.CONFIG3),makeBoxes(BoxConfig.CONFIG4),makeBoxes(BoxConfig.CONFIG5)};
-                break;
+    box[] boxes;
+    int next;
+    Stack<Integer> qs;
+    public Level(){
+        boxes=new box[1000];
+        next=0;
+        qs=new Stack<Integer>();
+
+    }
+    public void addBox(float x,float y,float width,float height,boolean physical, String text){
+        System.out.println(x+" "+y+" "+width+" "+height+" "+physical+" "+text);
+        if (qs.isEmpty()){
+            boxes[next]=new box(x,y,width,height,physical,text);
+            next++;
         }
     }
-    private box[] makeBoxes(BoxConfig boxConfig){
-        box[] boxes=boxConfig.getBoxArray().toArray(box.class);
-        return boxes;
+    void render(SpriteBatch sb){
+        for (int i=0;i<next;i++){
+            sb.draw(boxes[i].texture,boxes[i].getXPos(),boxes[i].getYPos(),boxes[i].getWidth(),boxes[i].getHeight());
+        }
     }
-    box[] getBoxes(int i){
-        System.out.println(i);
-        return order[i];
-    }
-    int getLength(){
-        return order.length;
-    }
+
 }

@@ -11,5 +11,6 @@ public class DesktopLauncher {
 		config.height=1920/3;
 		config.title="Crabeiry Game";
 		new LwjglApplication(new CranGame(), config);
+
 	}
 }

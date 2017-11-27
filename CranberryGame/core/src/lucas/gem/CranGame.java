@@ -39,16 +39,12 @@ public class CranGame extends ApplicationAdapter {
 		cam=new OrthographicCamera(WIDTH,HEIGHT);
 		cam.position.set(WIDTH/2,HEIGHT/2,0);
 		cam.update();
-		level=new Level(1);
+		level=new Level();
 		rearangeBoxes();
 		cran.giveBoxConfig(currentBoxes);
 	}
 
-	void rearangeBoxes(){
-		currentBoxes= new box[][]{level.getBoxes(nextBorder),level.getBoxes(nextBorder+1)};
-		System.out.println(currentBoxes[0][1].bounds[1]+" "+currentBoxes[1][1].bounds[1]);
-		nextBorder++;
-	}
+	void rearangeBoxes(){	}
 	void reset(){
 		cran=new Berry(30,100);
 		nextBorder=0;
@@ -58,10 +54,6 @@ public class CranGame extends ApplicationAdapter {
 	void update() {
 		if (cran.getPosition().y<0){
 			reset();
-		}
-		if (cran.getPosition().x/1080>nextBorder&&nextBorder+1<level.getLength()) {
-			rearangeBoxes();
-			cran.giveBoxConfig(currentBoxes);
 		}
 		cran.update(3f);
 	}
