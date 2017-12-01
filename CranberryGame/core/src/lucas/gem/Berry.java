@@ -49,7 +49,6 @@ public class Berry {
 
     void giveBoxConfig(box[][] b){
         System.arraycopy(b,0,boxes,0,2);
-
     }
     public void update(float dt){
         handleInput();
@@ -102,16 +101,14 @@ public class Berry {
     }
 
     public boolean checkX(){
-
         for (int j=0;j<2;j++) {
-            numOfBoxes=boxes[j].length;
-            for (int i = 0; i < numOfBoxes; i++) {
+            for (int i = 0; i <boxes[j].length-1; i++) {
                 if (position.y + size.y > boxes[j][i].getYPos() &&
                         position.y < boxes[j][i].getYandHeight() &&
-                        velocity.x + position.x + size.x > boxes[j][i].getXPos()+1080*(CranGame.nextBorder-1+j) &&
-                        velocity.x + position.x < boxes[j][i].getXandWidth()+1080*(CranGame.nextBorder-1+j)
+                        velocity.x + position.x + size.x > boxes[j][i].getXPos()+1080*(CranGame.nextBorder+j) &&
+                        velocity.x + position.x < boxes[j][i].getXandWidth()+1080*(CranGame.nextBorder+j)
                         ) {
-                    position.x = boxes[j][i].getXPos()+1080*(CranGame.nextBorder-1+j) - size.x;
+                    position.x = boxes[j][i].getXPos()+1080*(CranGame.nextBorder+j) - size.x;
                     return false;
                 }
             }
@@ -121,12 +118,11 @@ public class Berry {
 
     public boolean checkY(){
         for (int j=0;j<2;j++){
-            numOfBoxes=boxes[j].length;
-            for (int i=0;i<numOfBoxes;i++){
+            for (int i=0;i<boxes[j].length;i++){
                 if (    position.y+velocity.y+size.y>boxes[j][i].getYPos()&&
                         position.y+velocity.y<boxes[j][i].getYandHeight()&&
-                        position.x+size.x>boxes[j][i].getXPos()+1080*(CranGame.nextBorder-1+j)&&
-                        position.x<boxes[j][i].getXandWidth()+1080*(CranGame.nextBorder-1+j)){
+                        position.x+size.x>boxes[j][i].getXPos()+1080*(CranGame.nextBorder+j)&&
+                        position.x<boxes[j][i].getXandWidth()+1080*(CranGame.nextBorder+j)){
                     if (velocity.y<0){
                         position.y=boxes[j][i].getYandHeight();
                     }
