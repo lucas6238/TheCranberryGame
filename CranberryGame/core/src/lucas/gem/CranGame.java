@@ -27,6 +27,8 @@ public class CranGame extends ApplicationAdapter {
 	private Berry cran;
 	Level level;
 
+	boolean camStopped=false;
+
 	box[][] currentBoxes;
 	static int nextBorder=0;
 
@@ -37,7 +39,7 @@ public class CranGame extends ApplicationAdapter {
 		cam=new OrthographicCamera(WIDTH,HEIGHT);
 		cam.position.set(WIDTH/2,HEIGHT/2,0);
 		cam.update();
-
+		camStopped=false;
 		level = new Level();
 
 		currentBoxes=new box[2][100];
@@ -49,6 +51,8 @@ public class CranGame extends ApplicationAdapter {
 	void reset(){
 		cran=new Berry(540,100);
 		nextBorder=0;
+		level.nextLevel=0;
+		camStopped=false;
 		rearangeBoxes();
 		cran.giveBoxConfig(currentBoxes);
 	}
@@ -56,14 +60,15 @@ public class CranGame extends ApplicationAdapter {
 		if (cran.getPosition().y<0){
 			reset();
 		}
-		if (cam.position.x-(WIDTH/2)>1080*(nextBorder+1)){
-			System.out.println(cam.position.x+" "+WIDTH/2+" "+nextBorder);
-			addScreenLevelthing();
-			nextBorder++;
-			cran.giveBoxConfig(currentBoxes);
+		if (!camStopped) {
+			if (cam.position.x - (WIDTH / 2) > 1080 * (nextBorder + 1)) {
+				System.out.println(cam.position.x + " " + WIDTH / 2 + " " + nextBorder);
+				addScreenLevelthing();
+				nextBorder++;
+				cran.giveBoxConfig(currentBoxes);
+			}
 		}
 		cran.update(3f);
-
 	}
 	public void render () {
 		elapsedTime += Gdx.graphics.getDeltaTime();
@@ -73,9 +78,10 @@ public class CranGame extends ApplicationAdapter {
 
 
 		update();
-
-		cam.position.x=cran.getPosition().x;
-		cam.update();
+		if (!camStopped) {
+			cam.position.x = cran.getPosition().x+WIDTH/4;
+			cam.update();
+		}
 		batch.setProjectionMatrix(cam.combined);
 		batch.begin();
 		batch.draw(cran.getFrame(),cran.getPosition().x,cran.getPosition().y,128,100);
@@ -91,12 +97,17 @@ public class CranGame extends ApplicationAdapter {
 	}
 	void addScreenLevelthing(){
 		if (CranGame.nextBorder == 0) {
-			currentBoxes[0]=level.stage();
-			currentBoxes[1]=level.stage();
+			currentBoxes[0]=level.getBoxes();
+			currentBoxes[1]=level.getBoxes();
 		}
 		else{
-			currentBoxes[0]=currentBoxes[1];
-			currentBoxes[1]=level.stage();
+			try {
+				currentBoxes[0] = currentBoxes[1];
+				currentBoxes[1] = level.getBoxes();
+			}catch(ArrayIndexOutOfBoundsException e){
+				camStopped=true;
+				currentBoxes[1]=new box[]{};
+			}
 		}
 	}
 

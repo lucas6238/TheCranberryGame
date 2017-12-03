@@ -1,3 +1,14 @@
-0,0,1080,50
-500,50,500,50
-750,100,200,50
+/525 100 100 250 true box4a.png
+/400 100 100 100 true box4a.png
+/200 100 100 100 true box4a.png
+/650 100 100 100 true box4a.png
+0 0 108 100 true groundTexture2b.png
+108 0 108 100 true groundTexture2b.png
+216 0 108 100 true groundTexture2b.png
+324 0 108 100 true groundTexture2b.png
+432 0 108 100 true groundTexture2b.png
+540 0 108 100 true groundTexture2b.png
+648 0 108 100 true groundTexture2b.png
+756 0 108 100 true groundTexture2b.png
+864 0 108 100 true groundTexture2b.png
+972 0 108 100 true groundTexture2b.png

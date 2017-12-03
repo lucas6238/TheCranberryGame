@@ -2,16 +2,21 @@ package lucas.gem;
 
 import com.badlogic.gdx.graphics.Texture;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Stack;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ComboBoxEditor;
@@ -21,6 +26,8 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.border.Border;
 
 /**
  * Created by Chandler on 11/19/2017.
@@ -30,10 +37,14 @@ public class Menu {
     static float x,y,width,height;
     boolean physical;
 
+    Border bloackLine= BorderFactory.createLineBorder(Color.black);
+
 
     JFrame frame;
     JPanel jpan;
     JComboBox cBox;
+    JSpinner xSpin,ySpin,widthSpin,heightSpin;
+
     static JLabel label;
     static String selection="badlogic.jpg";
     Menu(){
@@ -44,22 +55,82 @@ public class Menu {
         y=0;
         frame=new JFrame("The Titties");
         frame.add(makePanel());
-        frame.setSize(300,300);
+        frame.setSize(600,900);
         frame.setVisible(true);
     }
     JPanel makePanel(){
-        jpan=new JPanel(new FlowLayout(FlowLayout.LEFT));
-        jpan.add(makeComboBox());
-        jpan.add(makeImage());
+        jpan=new JPanel(new BorderLayout());
+        makeComboBox();
+        makeImage();
+
+        cBox.setSize(400,20);
+        label.setSize(400,400);
+        jpan.add(cBox,BorderLayout.NORTH);
+        jpan.add(label,BorderLayout.CENTER);
+        jpan.add(spinners(),BorderLayout.SOUTH);
+
+        jpan.setBorder(bloackLine);
 
         return jpan;
+    }
+    JPanel spinners(){
+        JPanel temp,north,south;
+        xSpin=new JSpinner();
+        widthSpin=new JSpinner();
+
+
+
+        north=new JPanel(new FlowLayout());
+        north.add(xSpin);
+        north.add(widthSpin);
+
+        north.setBorder(bloackLine);
+
+        xSpin.setSize(200,20);
+        widthSpin.setSize(200,20);
+
+        ySpin=new JSpinner();
+        heightSpin=new JSpinner();
+
+        south=new JPanel(new FlowLayout());
+
+        south.add(new JLabel("Y"));
+        south.add(ySpin);
+        south.add(heightSpin);
+
+
+        south.setBorder(bloackLine);
+
+
+        ySpin.setSize(200,20);
+        ySpin.setMinimumSize(new Dimension(200,20));
+        heightSpin.setSize(200,20);
+
+        temp=new JPanel(new BorderLayout());
+        temp.add(north,BorderLayout.NORTH);
+        temp.add(south,BorderLayout.SOUTH);
+        return temp;
     }
     JComboBox makeComboBox(){
         File file=new File(".");
         File[] fileList=file.listFiles();
-        cBox=new JComboBox(fileList);
+        Stack<Integer> ints=new Stack<Integer>();
+        for (int i=0;i< fileList.length;i++){
+            if (fileList[i].toString().endsWith(".png")){
+                ints.push(i);
+            }
+            System.out.println();
+        }
+        File[] pngList=new File[ints.size()];
+
+        int n=ints.size();
+        for(int i=0;i<n;i++){
+            pngList[i]=fileList[ints.pop()];
+        }
+        cBox=new JComboBox(pngList);
         cBox.setMaximumSize(new Dimension(300,20));
         cBox.addActionListener(new action(cBox));
+        cBox.setBorder(bloackLine);
         return cBox;
     }
     JLabel makeImage(){
@@ -68,10 +139,10 @@ public class Menu {
         label.setVisible(true);
         label.setSize(200,200);
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setBorder(bloackLine);
         return label;
     }
     static void setWidth(float w){
-        System.out.println(w+"Spopy");
         width=w;
     }
     static void setHeight(float h){
@@ -84,7 +155,7 @@ public class Menu {
         return height;
     }
     String getTexture(){
-        return cBox.getSelectedItem().toString();
+        return Menu.selection;
     }
 }
 class action implements ActionListener{
@@ -94,19 +165,19 @@ class action implements ActionListener{
     }
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-
-
-
         Menu.selection=cBox.getSelectedItem().toString();
+        System.out.println(Menu.selection);
         ImageIcon icon=new ImageIcon(Menu.selection);
+        Menu.label.setSize(600,600);
         Menu.label.setIcon(icon);
         BufferedImage tex=null;
         try {
             tex = ImageIO.read(new File(cBox.getSelectedItem().toString()));
-        }catch(IOException e){
 
+            Menu.setWidth(tex.getWidth()*3);
+            Menu.setHeight(tex.getHeight()*3);
+        }catch(IOException e){
+            System.out.println("Texture not found");
         }
-        Menu.setWidth(tex.getWidth());
-        Menu.setHeight(tex.getHeight());
     }
 }
