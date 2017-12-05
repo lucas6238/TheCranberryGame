@@ -2,6 +2,12 @@ package lucas.gem;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
 
@@ -10,27 +16,54 @@ import javax.swing.Box;
 /**
  * Created by chandler on 11/11/2017.
  */
-
-
 public class Level {
     Stack<box> boxes;
+
+
     int next;
 
+    String level[];
+    int nextLevel;
+
     Stack<Integer> qs;
+
+    BufferedReader br;
 
     public Level(){
         boxes=new Stack<box>();
         next=0;
         qs=new Stack<Integer>();
-
+        level=new String[]{"start.level","start.level","start.level","start.level","start.level"};
+        nextLevel=0;
     }
     Random random = new Random();
-    box[] stage(){
+    box[] getBoxes(){
         boxes=new Stack<box>();
-        addBox();
+        readFile();
         box[] bux=new box[boxes.size()];
         System.arraycopy(boxes.toArray(),0,bux,0,boxes.size());
         return bux;
+    }
+    void readFile(){
+        try{
+            br=new BufferedReader(new FileReader(new File(level[nextLevel])));
+            nextLevel++;
+            String line;
+            String[] data;
+            while ((line=br.readLine())!=null){
+                data=line.split(" ");
+                if (!data[0].startsWith("/")) {
+                    addBox(Float.valueOf(data[0]), Float.valueOf(data[1]), Float.valueOf(data[2]), Float.valueOf(data[3]), Boolean.valueOf(data[4]), data[5]);
+                }
+            }
+        }catch(FileNotFoundException fnfe){
+
+        }catch (IOException ioe){
+
+        }
+    }
+    int getLength(){
+        return level.length;
     }
     public void addBox(){
         for (int i=0;i<10;i++) {
@@ -57,7 +90,7 @@ public class Level {
         }
     }
     public void addBox(float x,float y,float width,float height,boolean physical, String text){
-        boxes.push(new box(0,0,1080,100,true,"groundTexture2A.png"));
+        boxes.push(new box(x,y,width,height,physical,text));
 
     }
     void render(SpriteBatch sb){

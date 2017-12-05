@@ -63,10 +63,15 @@ public class Menu {
         makeComboBox();
         makeImage();
 
-        cBox.setSize(400,20);
-        label.setSize(400,400);
-        jpan.add(cBox,BorderLayout.NORTH);
-        jpan.add(label,BorderLayout.CENTER);
+        cBox.setPreferredSize(new Dimension(400,20));
+        label.setPreferredSize(new Dimension(400,400));
+
+        JPanel temp=new JPanel(new BorderLayout());
+        temp.add(label,BorderLayout.SOUTH);
+        temp.add(cBox,BorderLayout.NORTH);
+        temp.setPreferredSize(new Dimension(400,600));
+
+        jpan.add(temp,BorderLayout.NORTH);
         jpan.add(spinners(),BorderLayout.SOUTH);
 
         jpan.setBorder(bloackLine);
@@ -81,13 +86,15 @@ public class Menu {
 
 
         north=new JPanel(new FlowLayout());
+        north.add(new JLabel("X"));
         north.add(xSpin);
+        north.add(new JLabel("Width"));
         north.add(widthSpin);
 
         north.setBorder(bloackLine);
 
-        xSpin.setSize(200,20);
-        widthSpin.setSize(200,20);
+        xSpin.setPreferredSize(new Dimension(200,20));
+        widthSpin.setPreferredSize(new Dimension(200,20));
 
         ySpin=new JSpinner();
         heightSpin=new JSpinner();
@@ -96,15 +103,15 @@ public class Menu {
 
         south.add(new JLabel("Y"));
         south.add(ySpin);
+        south.add(new JLabel("Height"));
         south.add(heightSpin);
-
+        ySpin.setPreferredSize(new Dimension(200,20));
+        heightSpin.setPreferredSize(new Dimension(200,20));
 
         south.setBorder(bloackLine);
 
-
-        ySpin.setSize(200,20);
-        ySpin.setMinimumSize(new Dimension(200,20));
-        heightSpin.setSize(200,20);
+        north.setPreferredSize(new Dimension(400,40));
+        south.setPreferredSize(new Dimension(400,40));
 
         temp=new JPanel(new BorderLayout());
         temp.add(north,BorderLayout.NORTH);
@@ -137,7 +144,7 @@ public class Menu {
         ImageIcon icon=new ImageIcon(selection);
         label=new JLabel(icon);
         label.setVisible(true);
-        label.setSize(200,200);
+        label.setPreferredSize(new Dimension(200,200));
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
         label.setBorder(bloackLine);
         return label;
@@ -179,5 +186,16 @@ class action implements ActionListener{
         }catch(IOException e){
             System.out.println("Texture not found");
         }
+    }
+}
+class setX implements ActionListener{
+
+    JSpinner spin;
+    setX(JSpinner jspin){
+        spin=jspin;
+    }
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        spin.getValue();
     }
 }
