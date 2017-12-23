@@ -30,6 +30,9 @@ public class box{
         physical=phys;
         texture=new Texture(text);
     }
+    String getLine(){
+        return bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+texture;
+    }
     void setPhysical(boolean b){
         physical=b;
     }

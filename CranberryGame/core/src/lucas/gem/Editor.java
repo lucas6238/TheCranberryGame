@@ -15,6 +15,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 /**
  * Created by Chandler on 11/16/2017.
  */
@@ -25,6 +29,7 @@ public class Editor extends ApplicationAdapter {
     SpriteBatch sb;
     OrthographicCamera cam;
     float x,y;
+    int currentObject=-1;
     float mousex,mousey;
 
     private box[] boxes;
@@ -33,20 +38,17 @@ public class Editor extends ApplicationAdapter {
 
     Texture img;    @Override
     public void create() {
-        menu=new Menu();
-
+        menu=new Menu(this);
         boxes=new box[1000];
         boxesPlace=0;
         cam = new OrthographicCamera(1080, 1920);
         sr = new ShapeRenderer();
         sb=new SpriteBatch();
-        cam.position.set(1920 / 2, 1080 / 2, 0);
+        cam.position.set(1080 / 2, 1920 / 2, 0);
 
         //this looks retarded but there's an issue where the screen is a few pixels lower than it should be until it's resized. This fixes it
         Gdx.graphics.setResizable(false);
         Gdx.graphics.setResizable(true);
-
-
     }
 
     @Override
@@ -54,41 +56,107 @@ public class Editor extends ApplicationAdapter {
         update();
         Gdx.gl.glClearColor(0, 0, 1, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         cam.update();
 
-        sb.setProjectionMatrix(cam.combined);
-        sb.begin();
         renderLevel();
-        sb.end();
-    }
-    void rendershapes(){
-        sr.setAutoShapeType(true);
-        sr.setProjectionMatrix(cam.combined);
-        sr.begin();
-        sr.box(x,y,0,105,105,0);
-        sr.end();
+        renderSelection();
     }
     void renderLevel(){
+        sb.setProjectionMatrix(cam.combined);
+        sb.begin();
         for (int i=0;i<boxesPlace;i++){
             sb.draw(boxes[i].texture,boxes[i].getXPos(),boxes[i].getYPos(),boxes[i].getWidth(),boxes[i].getHeight());
         }
+        sb.end();
+    }
+    void renderSelection(){
+        if (currentObject>-1){
+            box b=boxes[currentObject];
+            sr.begin(ShapeRenderer.ShapeType.Line);
+            sr.setProjectionMatrix(cam.combined);
+            sr.setColor(1,0,0,1);
+            sr.box(b.getXPos(),b.getYPos(),0,b.getWidth(),b.getHeight(),0);
+            sr.end();
+        }
     }
     void update(){
-        mouseCords();
-        if (Gdx.input.justTouched()){
-            addBox(mousex,mousey,menu.getWidth(),menu.getHeight(),menu.physical,menu.getTexture());
+        for (int i=0;i<100;i++){
+            if (Gdx.input.isKeyPressed(i)){
+                System.out.println(i);
+            }
         }
+        mouseCords();
+        if (currentObject>-1){
+            boxes[currentObject].bounds[2]=menu.getWidth();
+            boxes[currentObject].bounds[3]=menu.getHeight();
+            boxes[currentObject].bounds[0]=menu.getX();
+            boxes[currentObject].bounds[1]=menu.getY();
+        }
+        handleInput();
+    }
+    void handleInput(){
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            menu.setX(boxes[currentObject].getXPos()-1);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            menu.setX(boxes[currentObject].getXPos()+1);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)){
+            menu.setY(boxes[currentObject].getYPos()+1);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+            menu.setY(boxes[currentObject].getYPos()-1);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DEL)){
+            if (currentObject !=-1) {
+                removeBox(currentObject);
+            }
+        }
+        if (Gdx.input.justTouched()) {
+            if (checkForSelection()) {
+                Menu.setX(boxes[currentObject].getXPos());
+                Menu.setY(boxes[currentObject].getYPos());
+                Menu.setWidth(boxes[currentObject].getWidth());
+                Menu.setHeight(boxes[currentObject].getHeight());
+            } else {
+                menu.resetValues();
+                addBox(mousex, mousey, menu.getWidth(), menu.getHeight(), menu.physical, menu.getTexture());
+                Menu.setX(mousex);
+                Menu.setY(mousey);
+            }
+        }
+    }
+    boolean checkForSelection(){
+        for (int i=0;i<boxesPlace;i++){
+            if (mousex>boxes[i].getXPos()&&mousex<boxes[i].getXandWidth()&&mousey>boxes[i].getYPos()&&mousey<boxes[i].getYandHeight()){
+                currentObject=i;
+                return true;
+            }
+        }
+        return false;
     }
     void addBox(float x,float y,float width,float height,boolean physical,String texture){
         boxes[boxesPlace]=new box(x,y,width,height,physical,texture);
+        currentObject=boxesPlace;
         boxesPlace++;
     }
     void removeBox(int i){
+        currentObject=-1;
         for (i=i;i<boxesPlace;i++){
             boxes[i]=boxes[i+1];
         }
         boxesPlace--;
+    }
+    void save(){
+        FileWriter fw=new FileWriter(menu.fileName);
+        BufferedWriter bw = new BufferedWriter(fw);
+        for (int i=0;i<boxesPlace;i++){
+            try {
+                bw.write(boxes[i].getLine());
+            }catch(IOException ioe){
+
+            }
+        }
     }
     void mouseCords(){
         Vector3 cords=new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
@@ -97,6 +165,4 @@ public class Editor extends ApplicationAdapter {
             mousex=cords.x;
         }
     }
-
-
 }
