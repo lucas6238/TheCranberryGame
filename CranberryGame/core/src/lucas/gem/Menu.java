@@ -26,6 +26,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ComboBoxEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -56,18 +57,18 @@ public class Menu {
 
     static JLabel label;
     static String selection = "badlogic.jpg";
-
+    String fileName="";
     Menu(Editor ed) {
         makeFrame();
         editor = ed;
     }
-
     void makeFrame() {
         x = 0;
         y = 0;
         width = 0;
         height = 0;
         frame = new JFrame("The JFrame");
+        frame.setJMenuBar(makeMenuBar());
         frame.add(makePanel());
         frame.setSize(600, 900);
         frame.setVisible(true);
@@ -94,9 +95,14 @@ public class Menu {
     }
     JMenuBar makeMenuBar(){
         JMenuBar menuBar=new JMenuBar();
-        JMenu menu=new JMenu();
-        JMenuItem menuItem=new JMenuItem();
+        JMenu menu=new JMenu("here");
+        JMenuItem menuItem=new JMenuItem("Save");
         menuItem.addActionListener(new SaveAction(this));
+        menu.add(menuItem);
+        menuItem=new JMenuItem("Open");
+        menuItem.addActionListener(new LoadAction(this));
+        menu.add(menuItem);
+        menuBar.add(menu);
         return menuBar;
     }
 
@@ -142,7 +148,6 @@ public class Menu {
         temp.add(south, BorderLayout.SOUTH);
         return temp;
     }
-
     JComboBox makeComboBox() {
         File file = new File(".");
         File[] fileList = file.listFiles();
@@ -151,7 +156,6 @@ public class Menu {
             if (fileList[i].toString().endsWith(".png")) {
                 ints.push(i);
             }
-            System.out.println();
         }
         File[] pngList = new File[ints.size()];
         int n = ints.size();
@@ -177,8 +181,8 @@ public class Menu {
         BufferedImage tex=null;
         try {
             tex = ImageIO.read(new File(cBox.getSelectedItem().toString()));
-            Menu.setWidth(tex.getWidth()*3);
-            Menu.setHeight(tex.getHeight()*3);
+            Menu.setWidth(tex.getWidth()*10);
+            Menu.setHeight(tex.getHeight()*10);
             Menu.updateValues();
         }catch(IOException e){
             System.out.println("Texture not found");
@@ -192,7 +196,16 @@ public class Menu {
         y=Float.valueOf(ySpin.getValue().toString());
     }
     void save(){
-        editor.save();
+        JFrame tempframe=new JFrame("Save as...");
+        JFileChooser jfc=new JFileChooser();
+        jfc.showSaveDialog(null);
+        System.out.println(jfc.getSelectedFile().toString());
+        editor.save(jfc.getSelectedFile().toString());
+    }
+    void load(){
+        JFileChooser jfc=new JFileChooser();
+        jfc.showOpenDialog(null);
+        editor.setShouldLoad(jfc.getSelectedFile().toString());
     }
     static void setWidth(float w) {
         widthSpin.setValue(w);
@@ -237,7 +250,6 @@ class action implements ActionListener{
         ImageIcon icon=new ImageIcon(Menu.selection);
         Menu.label.setSize(600,600);
         Menu.label.setIcon(icon);
-        BufferedImage tex=null;
     }
 }
 class updateValues implements ChangeListener{
@@ -256,5 +268,15 @@ class SaveAction implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         menu.save();
+    }
+}
+class LoadAction implements ActionListener{
+    Menu menu;
+    LoadAction(Menu m){
+        menu=m;
+    }
+    @Override
+    public void actionPerformed(ActionEvent actionEvent){
+        menu.load();
     }
 }

@@ -15,7 +15,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -35,6 +37,8 @@ public class Editor extends ApplicationAdapter {
     private box[] boxes;
     private int boxesPlace;
     Menu menu;
+    String fileName="";
+    boolean shouldLoad=false;
 
     Texture img;    @Override
     public void create() {
@@ -79,7 +83,15 @@ public class Editor extends ApplicationAdapter {
             sr.end();
         }
     }
+    void setShouldLoad(String s){
+        fileName=s;
+        shouldLoad=true;
+    }
     void update(){
+        if (shouldLoad){
+            shouldLoad=false;
+            load(fileName);
+        }
         for (int i=0;i<100;i++){
             if (Gdx.input.isKeyPressed(i)){
                 System.out.println(i);
@@ -147,15 +159,34 @@ public class Editor extends ApplicationAdapter {
         }
         boxesPlace--;
     }
-    void save(){
-        FileWriter fw=new FileWriter(menu.fileName);
-        BufferedWriter bw = new BufferedWriter(fw);
-        for (int i=0;i<boxesPlace;i++){
-            try {
+    void save(String fileName){
+        try{
+            FileWriter fw=new FileWriter(fileName+".level");
+            BufferedWriter bw = new BufferedWriter(fw);
+            for (int i=0;i<boxesPlace;i++){
                 bw.write(boxes[i].getLine());
-            }catch(IOException ioe){
-
             }
+            bw.close();
+        }catch(IOException ioe){
+        }
+    }
+    void load(String fileName){
+        System.out.println(fileName);
+        try{
+            FileReader fr=new FileReader(fileName);
+            BufferedReader br=new BufferedReader(fr);
+            String[] fields;
+            String line;
+            boxes=new box[1000];
+            currentObject=-1;
+            boxesPlace=0;
+            while ((line=br.readLine())!=null){
+                System.out.println(line);
+                fields=line.split(",");
+                addBox(Float.valueOf(fields[0]),Float.valueOf(fields[1]),Float.valueOf(fields[2]),Float.valueOf(fields[3]),Boolean.getBoolean(fields[4]),"box4a.png");
+            }
+        }catch(IOException io){
+            System.out.println(io);
         }
     }
     void mouseCords(){

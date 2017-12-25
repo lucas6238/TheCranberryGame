@@ -15,6 +15,7 @@ public class box{
     Color color;
     boolean physical;
     Texture texture;
+    String textureName="";
 
     box(float xPosition,float yPosition,float width, float height){
         bounds=new float[] {xPosition,yPosition,width,height};
@@ -29,9 +30,11 @@ public class box{
         bounds=new float[] {xPosition,yPosition,width,height};
         physical=phys;
         texture=new Texture(text);
+        textureName=text;
     }
     String getLine(){
-        return bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+texture;
+        //System.out.println(bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+textureName);
+        return bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+textureName+"\r\n";
     }
     void setPhysical(boolean b){
         physical=b;
