@@ -95,7 +95,7 @@ public class Menu {
     }
     JMenuBar makeMenuBar(){
         JMenuBar menuBar=new JMenuBar();
-        JMenu menu=new JMenu("here");
+        JMenu menu=new JMenu("File");
         JMenuItem menuItem=new JMenuItem("Save");
         menuItem.addActionListener(new SaveAction(this));
         menu.add(menuItem);
@@ -196,7 +196,6 @@ public class Menu {
         y=Float.valueOf(ySpin.getValue().toString());
     }
     void save(){
-        JFrame tempframe=new JFrame("Save as...");
         JFileChooser jfc=new JFileChooser();
         jfc.showSaveDialog(null);
         System.out.println(jfc.getSelectedFile().toString());
@@ -206,6 +205,9 @@ public class Menu {
         JFileChooser jfc=new JFileChooser();
         jfc.showOpenDialog(null);
         editor.setShouldLoad(jfc.getSelectedFile().toString());
+    }
+    float[] getBounds(){
+        return new float[]{x,y,width,height};
     }
     static void setWidth(float w) {
         widthSpin.setValue(w);

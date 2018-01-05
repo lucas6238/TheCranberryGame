@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -26,11 +27,9 @@ import java.io.IOException;
  */
 
 public class Editor extends ApplicationAdapter {
-    static Color color = new Color(.1f, .5f, 0f, 1);
     ShapeRenderer sr;
     SpriteBatch sb;
     OrthographicCamera cam;
-    float x,y;
     int currentObject=-1;
     float mousex,mousey;
 
@@ -92,55 +91,45 @@ public class Editor extends ApplicationAdapter {
             shouldLoad=false;
             load(fileName);
         }
-        for (int i=0;i<100;i++){
-            if (Gdx.input.isKeyPressed(i)){
-                System.out.println(i);
-            }
-        }
         mouseCords();
         if (currentObject>-1){
-            boxes[currentObject].bounds[2]=menu.getWidth();
-            boxes[currentObject].bounds[3]=menu.getHeight();
-            boxes[currentObject].bounds[0]=menu.getX();
-            boxes[currentObject].bounds[1]=menu.getY();
+            boxes[currentObject].setBounds(menu.getBounds());
         }
         handleInput();
     }
     void handleInput(){
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            menu.setX(boxes[currentObject].getXPos()-1);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            menu.setX(boxes[currentObject].getXPos()+1);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)){
-            menu.setY(boxes[currentObject].getYPos()+1);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-            menu.setY(boxes[currentObject].getYPos()-1);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DEL)){
-            if (currentObject !=-1) {
-                removeBox(currentObject);
-            }
-        }
+        keyCheck();
         if (Gdx.input.justTouched()) {
             if (checkForSelection()) {
-                Menu.setX(boxes[currentObject].getXPos());
-                Menu.setY(boxes[currentObject].getYPos());
-                Menu.setWidth(boxes[currentObject].getWidth());
-                Menu.setHeight(boxes[currentObject].getHeight());
+                setSelected();
             } else {
                 menu.resetValues();
                 addBox(mousex, mousey, menu.getWidth(), menu.getHeight(), menu.physical, menu.getTexture());
-                Menu.setX(mousex);
-                Menu.setY(mousey);
+
             }
         }
     }
+    void setSelected(){
+        Menu.setX(boxes[currentObject].getXPos());
+        Menu.setY(boxes[currentObject].getYPos());
+        Menu.setWidth(boxes[currentObject].getWidth());
+        Menu.setHeight(boxes[currentObject].getHeight());
+    }
+    void keyCheck(){
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+            menu.setX(boxes[currentObject].getXPos()-1);
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            menu.setX(boxes[currentObject].getXPos()+1);
+        if (Gdx.input.isKeyPressed(Input.Keys.UP))
+            menu.setY(boxes[currentObject].getYPos()+1);
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+            menu.setY(boxes[currentObject].getYPos()-1);
+        if (Gdx.input.isKeyPressed(112)&&currentObject !=-1)
+            removeBox(currentObject);
+    }
     boolean checkForSelection(){
         for (int i=0;i<boxesPlace;i++){
-            if (mousex>boxes[i].getXPos()&&mousex<boxes[i].getXandWidth()&&mousey>boxes[i].getYPos()&&mousey<boxes[i].getYandHeight()){
+            if (boxes[i].checkCollision(mousex,mousey)){
                 currentObject=i;
                 return true;
             }
@@ -148,9 +137,36 @@ public class Editor extends ApplicationAdapter {
         return false;
     }
     void addBox(float x,float y,float width,float height,boolean physical,String texture){
+        float tempx=x,tempy=y;
+        for (int i=0;i<boxesPlace;i++){
+            box b = boxes[i];
+            if (checkForCloseToPoint(b.getXPos(),b.getYPos())){
+                tempx=b.getXPos()-width;
+                tempy=b.getYPos();
+            }else if ( checkForCloseToPoint(b.getXPos(),b.getYandHeight())){
+                tempx=b.getXPos()-width;
+                tempy=b.getYandHeight();
+            }else if (checkForCloseToPoint(b.getXandWidth(),b.getYPos())){
+                tempx=b.getXandWidth();
+                tempy=b.getYPos();
+            }else if (checkForCloseToPoint(b.getXandWidth(),b.getYandHeight())){
+                tempx=b.getXandWidth();
+                tempy=b.getYandHeight();
+            }
+        }
+//        System.out.println("placing at"+tempx+" "+tempy);
+        Menu.setX(tempx);
+        Menu.setY(tempy);
         boxes[boxesPlace]=new box(x,y,width,height,physical,texture);
         currentObject=boxesPlace;
         boxesPlace++;
+    }
+    boolean checkForCloseToPoint(float x,float y){
+//        System.out.println("Check for" + x+" "+y);
+        if (Math.abs(mousex-x)<20&&Math.abs(mousey-y)<20){
+            return true;
+        }
+        return false;
     }
     void removeBox(int i){
         currentObject=-1;
@@ -183,16 +199,17 @@ public class Editor extends ApplicationAdapter {
             while ((line=br.readLine())!=null){
                 System.out.println(line);
                 fields=line.split(",");
-                addBox(Float.valueOf(fields[0]),Float.valueOf(fields[1]),Float.valueOf(fields[2]),Float.valueOf(fields[3]),Boolean.getBoolean(fields[4]),"box4a.png");
+                addBox(Float.valueOf(fields[0]),Float.valueOf(fields[1]),Float.valueOf(fields[2]),Float.valueOf(fields[3]),Boolean.getBoolean(fields[4]),fields[5]);
             }
         }catch(IOException io){
             System.out.println(io);
         }
     }
     void mouseCords(){
-        Vector3 cords=new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
         if (Gdx.input.justTouched()){
-            mousey=cam.unproject(cords).y;
+            Vector3 cords=new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
+            cam.unproject(cords);
+            mousey=cords.y;
             mousex=cords.x;
         }
     }

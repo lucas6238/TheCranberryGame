@@ -32,9 +32,14 @@ public class box{
         texture=new Texture(text);
         textureName=text;
     }
+    boolean checkCollision(float x,float y){
+        return x>bounds[0]&&x<bounds[0]+bounds[2]&&y>bounds[1]&&y<bounds[1]+bounds[3];
+    }
     String getLine(){
-        //System.out.println(bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+textureName);
         return bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+textureName+"\r\n";
+    }
+    void setBounds(float[] b){
+        System.arraycopy(b,0,bounds,0,4);
     }
     void setPhysical(boolean b){
         physical=b;
