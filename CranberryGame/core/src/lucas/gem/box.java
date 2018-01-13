@@ -2,6 +2,7 @@ package lucas.gem;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import java.util.Random;
 
@@ -9,7 +10,7 @@ import java.util.Random;
  * Created by chandler on 11/11/2017.
  */
 
-public class box{
+public class box extends Actor{
     private static Random random=new Random();
     float[] bounds=new float[] {0,0,0,0};
     Color color;
@@ -38,44 +39,44 @@ public class box{
     String getLine(){
         return bounds[0]+","+bounds[1]+","+bounds[2]+","+bounds[3]+","+physical+","+textureName+"\r\n";
     }
-    void setBounds(float[] b){
+    public void setBounds(float[] b){
         System.arraycopy(b,0,bounds,0,4);
     }
-    void setPhysical(boolean b){
+    public void setPhysical(boolean b){
         physical=b;
     }
-    void setWidth(float n){
+    public void setWidth(float n){
         bounds[3]=n;
     }
-    void setHeight(float n){
+    public void setHeight(float n){
         bounds[4]=n;
     }
-    void setX(float n){
+    public void setX(float n){
         bounds[0]=n;
     }
-    void setY(float n){
+    public void setY(float n){
         bounds[1]=n;
     }
-    void setColor(float[] rgba){
+    public void setColor(float[] rgba){
         color.set(rgba[0],rgba[1],rgba[2],rgba[3]);
     }
-    Color getColor(){return color;}
-    float getXPos(){
+    public Color getColor(){return color;}
+    public float getXPos(){
         return bounds[0];
     }
-    float getWidth(){
+    public float getWidth(){
         return bounds[2];
     }
-    float getYPos(){
+    public float getYPos(){
         return bounds[1];
     }
-    float getHeight(){
+    public float getHeight(){
         return bounds[3];
     }
-    float getXandWidth(){
+    public float getXandWidth(){
         return bounds[0]+bounds[2];
     }
-    float getYandHeight(){
+    public float getYandHeight(){
         return bounds[1]+bounds[3];
     }
 }

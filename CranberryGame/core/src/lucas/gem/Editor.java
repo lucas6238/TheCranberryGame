@@ -14,6 +14,9 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.io.BufferedReader;
@@ -31,19 +34,24 @@ public class Editor extends ApplicationAdapter {
     SpriteBatch sb;
     OrthographicCamera cam;
     int currentObject=-1;
-    float mousex,mousey;
 
+    Vector3 mouse = new Vector3();
+    Vector3 lastMouse = new Vector3(mouse.x,mouse.y,0);
+    Vector3 adjustment =  new Vector3(0,2,0);
     private box[] boxes;
     private int boxesPlace;
     Menu menu;
+    DragListener dl;
     String fileName="";
     boolean shouldLoad=false;
+    float xdif,ydif;
 
     Texture img;    @Override
     public void create() {
         menu=new Menu(this);
         boxes=new box[1000];
         boxesPlace=0;
+        dl = new DragListener();
         cam = new OrthographicCamera(1080, 1920);
         sr = new ShapeRenderer();
         sb=new SpriteBatch();
@@ -98,17 +106,26 @@ public class Editor extends ApplicationAdapter {
         handleInput();
     }
     void handleInput(){
+
         keyCheck();
+
         if (Gdx.input.justTouched()) {
             if (checkForSelection()) {
                 setSelected();
+                xdif=mouse.x-boxes[currentObject].getXPos();
+                ydif=mouse.y-boxes[currentObject].getYPos();
+
             } else {
                 menu.resetValues();
-                addBox(mousex, mousey, menu.getWidth(), menu.getHeight(), menu.physical, menu.getTexture());
-
+                addBox(mouse.x, mouse.y, menu.getWidth(), menu.getHeight(), menu.physical, menu.getTexture());
             }
         }
+
+
+
     }
+
+
     void setSelected(){
         Menu.setX(boxes[currentObject].getXPos());
         Menu.setY(boxes[currentObject].getYPos());
@@ -129,7 +146,7 @@ public class Editor extends ApplicationAdapter {
     }
     boolean checkForSelection(){
         for (int i=0;i<boxesPlace;i++){
-            if (boxes[i].checkCollision(mousex,mousey)){
+            if (boxes[i].checkCollision(mouse.x,mouse.y)){
                 currentObject=i;
                 return true;
             }
@@ -163,7 +180,7 @@ public class Editor extends ApplicationAdapter {
     }
     boolean checkForCloseToPoint(float x,float y){
 //        System.out.println("Check for" + x+" "+y);
-        if (Math.abs(mousex-x)<20&&Math.abs(mousey-y)<20){
+        if (Math.abs(mouse.x-x)<20&&Math.abs(mouse.y-y)<20){
             return true;
         }
         return false;
@@ -209,8 +226,8 @@ public class Editor extends ApplicationAdapter {
         if (Gdx.input.justTouched()){
             Vector3 cords=new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
             cam.unproject(cords);
-            mousey=cords.y;
-            mousex=cords.x;
+            mouse.x=cords.x;
+            mouse.y =cords.y;
         }
     }
 }
